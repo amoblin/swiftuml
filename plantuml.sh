@@ -1,9 +1,16 @@
 #!/bin/sh
 
-
 FILE=$1
 
-JQ='[."key.substructure"[]? | select(."key.kind" == "source.lang.swift.decl.class")?, select(."key.kind" == "source.lang.swift.decl.struct")? , select(."key.kind" == "source.lang.swift.decl.enum")?, select(."key.kind" == "source.lang.swift.decl.extension")? , select(."key.kind" == "source.lang.swift.decl.protocol")? | {kind: ."key.kind" , name: ."key.name", inherits: ."key.inheritedtypes", members: [       (."key.substructure"[] |         select(."key.kind" == "source.lang.swift.decl.function.method.instance") |       {name:  ."key.name", scope: ."key.accessibility"})]} ]'
+JQ='[."key.substructure"[]? |
+   select(."key.kind" == "source.lang.swift.decl.class")?,
+   select(."key.kind" == "source.lang.swift.decl.struct")? ,
+   select(."key.kind" == "source.lang.swift.decl.enum")?,
+   select(."key.kind" == "source.lang.swift.decl.extension_disable")? ,
+   select(."key.kind" == "source.lang.swift.decl.function.method.instance")?,
+   select(."key.kind" == "source.lang.swift.decl.var.instance")?,
+   select(."key.kind" == "source.lang.swift.decl.protocol")?
+   | {kind: ."key.kind" , name: ."key.name", inherits: ."key.inheritedtypes", members: [       (."key.substructure"[] |         select(."key.kind" == "source.lang.swift.decl.function.method.instance") |       {name:  ."key.name", scope: ."key.accessibility"})]} ]'
 
 sourcekitten structure --file "$FILE" | jq "$JQ" > out.json
 

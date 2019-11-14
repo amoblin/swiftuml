@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 
 let isSwiftClass = 'source.lang.swift.decl.class'
 let isSwiftStruct = 'source.lang.swift.decl.struct'
@@ -8,12 +9,12 @@ let isPublic = 'source.lang.swift.accessibility.internal'
 let isPrivate = 'source.lang.swift.accessibility.private'
 
 
-let linkTypeInheritance = '--|>' 
-let linkTypeRealize = '..|>' 
-let linkTypeDependency = '<..' 
-let linkTypeAssociation = '-->' 
-let linkTypeAggregation = '--o' 
-let linkTypeComposition = '--*' 
+let linkTypeInheritance = '--|>'
+let linkTypeRealize = '..|>'
+let linkTypeDependency = '<..'
+let linkTypeAssociation = '-->'
+let linkTypeAggregation = '--o'
+let linkTypeComposition = '--*'
 let linkTypeGeneric = '--'
 
 
@@ -42,7 +43,7 @@ function uniqName(item, index, relationship){
         if (item.kind == isSwiftExtension) {
             var connect = `${item.name} ${linkTypeDependency} ${newName} : ${relationship}`
             extnConnections.push(connect)
-            
+
         }
     }
     // else if(item.kind == isSwiftExtension) {
@@ -52,7 +53,7 @@ function uniqName(item, index, relationship){
     // }
     else {
         uniqElementNames.push(item.name)
-        uniqElementAndTypes[item.name] =  relationship 
+        uniqElementAndTypes[item.name] =  relationship
 
         if (relationship == "inherits"){
             uniqElementAndTypes[linkTypeKey] = linkTypeInheritance
@@ -75,7 +76,7 @@ function uniqName(item, index, relationship){
         else {
             uniqElementAndTypes[linkTypeKey] = linkTypeGeneric
         }
-        
+
     }
     return newName
 }
@@ -97,7 +98,7 @@ var extnConnections = []
 srcjs.forEach(function (item){
     var strItem = ''
     if (item && item.kind == isSwiftClass && item.name){
-        
+
         strItem += 'class "' + item.name + '" as ' + uniqName(item, i, "inherits") + ' {\n'
 
     }
@@ -119,16 +120,16 @@ srcjs.forEach(function (item){
     }
 
     var methods = ''
-    
+
     if (item.members && item.members.length>0){
-        
+
         item.members.forEach(function (method) {
             var msig = '  '
             msig += (method.scope == isPublic)? '+': '-'
             msig += method.name + '\n'
             methods += msig
         })
-        
+
     }
 
     if (item.inherits && item.inherits.length > 0) {
@@ -138,11 +139,11 @@ srcjs.forEach(function (item){
             var linkTo = obj["key.name"]
             var namedConnection = (uniqElementAndTypes[linkTo]) ? ": " + uniqElementAndTypes[linkTo] : ""
             var linkTypeKey = item.name + "LinkType"
-            
+
             if (uniqElementAndTypes[linkTo] == "confirms to"){
                 linkTypeKey = linkTo + "LinkType"
             }
-           
+
             var connect = `${item.name} ${uniqElementAndTypes[linkTypeKey]} ${linkTo} ${namedConnection}`
             connections.push(connect)
         })
@@ -155,6 +156,7 @@ srcjs.forEach(function (item){
 }
 );
 
-var out = plantumlTemplate.replace(STR2REPLACE, msg + "\n" + connections.join("\n") + "\n" + extnConnections.join("\n"))
+//var out = plantumlTemplate.replace(STR2REPLACE, msg + "\n" + connections.join("\n") + "\n" + extnConnections.join("\n"))
+var out = msg + "\n" + connections.join("\n") + "\n" + extnConnections.join("\n")
 
 console.log(out)
